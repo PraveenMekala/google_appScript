@@ -10,3 +10,6 @@ SaveSheetToDataBase:
 https://docs.google.com/spreadsheets/d/1evFQ1seAzCMCZ06_TKNo_WPJAoqEFpMewqxfjYCgeuQ/edit#gid=0
 
 
+UpdateSheetToDataBase:
+https://docs.google.com/spreadsheets/d/1b3S2ZiRoIQhx3Wi4zUdEahp1DyGx-_qFvXJi9wcMnlU/edit
+
