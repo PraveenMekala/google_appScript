@@ -1,0 +1,41 @@
+function syncSheetWithDBConfirmation() {
+  Logger.log('In SyncSheetWithDBConfirmation');
+  clearFormat();
+  
+  var ui = SpreadsheetApp.getUi();
+  var response = ui.alert('Are you sure you want to syncSheetWithDB?', ui.ButtonSet.YES_NO);
+  
+  if (response == ui.Button.YES) {
+     Logger.log('The user clicked "Yes."');
+     syncSheetWithDB();
+   } else {
+     Logger.log('The user clicked "No" or the dialog\'s close button.');
+   }
+}
+
+function syncSheetWithDB(){
+   
+   var ss = SpreadsheetApp.getActiveSpreadsheet();
+   var sheet = ss.getSheets()[0];
+   var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+   var stmt = conn.createStatement();
+   
+   //To clear sheet data
+   clearSheetData();
+
+   var results = stmt.executeQuery('SELECT * FROM celebrityInfo');
+   while(results.next()){
+     sheet.appendRow([results.getString(1),results.getString(2),results.getString(3),results.getString(4),results.getString(5)])
+   }
+   Logger.log(sheet.getSheetName() +' sheet synced with database successfully!!!..');
+   results.close();
+   conn.close();
+}
+
+function clearSheetData(){
+ var ss = SpreadsheetApp.getActiveSpreadsheet();
+ var sheet = ss.getSheets()[0];
+ sheet.clear();
+ sheet.clearFormats();
+ Logger.log(sheet.getSheetName() +' Sheet Data Cleared!!!..');
+}

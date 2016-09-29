@@ -1,0 +1,62 @@
+function syncDBWithSheetConfirmation(){
+ Logger.log('In syncDBWithSheetConfirmation')
+ clearFormat();
+ 
+ if(isSheetEmpty() == true){
+   sheetEmptyAlert();
+ }
+ else{
+  var ui = SpreadsheetApp.getUi();
+  var response = ui.alert('Are you sure you want to syncDBWithSheet?', ui.ButtonSet.YES_NO);
+  
+  if (response == ui.Button.YES) {
+     Logger.log('The user clicked "Yes."');
+     syncDBWithSheet();
+   } else {
+     Logger.log('The user clicked "No" or the dialog\'s close button.');
+   }
+ }
+}
+
+function syncDBWithSheet(){
+
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetData = sheet.getDataRange().getValues();
+  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+  conn.setAutoCommit(false);
+  var insertBatchStmt = conn.prepareStatement('INSERT INTO celebrityInfo '+ '(id, displayName, twitterId, facebookId, instagramId ) values (?, ?, ?, ?, ?)',1004,1007);
+
+  clearDB();
+  Logger.log('sdfdfdsf'+sheetData.length);
+  
+  for(var i=0; i<sheetData.length; i++){
+    var id  = sheetData[i][0].toString();
+    var displayName = sheetData[i][1].toString();
+    var twitterId   = sheetData[i][2].toString();
+    var facebookId  = sheetData[i][3].toString();
+    var instagramId = sheetData[i][4].toString();
+    
+    Logger.log(id+displayName+twitterId+facebookId+instagramId);
+    
+    insertBatchStmt.setString(1, id);
+    insertBatchStmt.setString(2, displayName);
+    insertBatchStmt.setString(3, twitterId);
+    insertBatchStmt.setString(4, facebookId);
+    insertBatchStmt.setString(5, instagramId);
+    insertBatchStmt.addBatch();  
+  }
+
+  insertBatchStmt.executeBatch();
+  Logger.log('Database synced with '+sheet.getSheetName() +' sheet successfully!!!..');
+  sendEmail("Database synced with TotallyAbout SpreadSheet successfully..");
+  insertBatchStmt.close();
+  conn.commit();
+  conn.close();
+}
+
+function clearDB(){
+  var conn = Jdbc.getConnection(dbUrl, user, userPwd);
+  var stmt = conn.createStatement();
+  Logger.log(stmt.executeUpdate('DELETE FROM celebrityInfo'));
+  
+}
